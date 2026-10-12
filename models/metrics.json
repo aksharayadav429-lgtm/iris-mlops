@@ -1,0 +1,11 @@
+{
+  "test_accuracy": 1.0,
+  "cv_accuracy_5fold": 0.96,
+  "params": {
+    "hidden_layer_sizes": "(16, 8)",
+    "activation": "relu",
+    "solver": "adam",
+    "max_iter": "2000",
+    "random_state": "0"
+  }
+}

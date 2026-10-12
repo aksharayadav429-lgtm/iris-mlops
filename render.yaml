@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: iris-mlops
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
