@@ -3,3 +3,7 @@ __pycache__/
 .venv/
 mlruns/
 .pytest_cache/
+
+# Local MLflow tracking database
+mlflow.db
+mlflow.db.backup
