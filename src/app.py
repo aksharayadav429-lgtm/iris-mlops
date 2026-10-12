@@ -1,13 +1,20 @@
-"""FastAPI service that serves the trained Iris model."""
+"""FastAPI service that serves the Iris classifier frontend and API."""
+
 import json
+from pathlib import Path
 
 import joblib
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from src.config import METRICS_PATH, MODEL_PATH, TARGET_NAMES
 
 app = FastAPI(title="Iris Neural Network API", version="1.0.0")
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_PATH = BASE_DIR / "index.html"
+
 model = joblib.load(MODEL_PATH)
 
 
@@ -20,7 +27,7 @@ class IrisInput(BaseModel):
 
 @app.get("/")
 def root():
-    return {"message": "Iris model API. See /docs for the interactive UI."}
+    return FileResponse(FRONTEND_PATH, media_type="text/html")
 
 
 @app.get("/health")
@@ -30,13 +37,30 @@ def health():
 
 @app.get("/metrics")
 def metrics():
-    return json.loads(METRICS_PATH.read_text()) if METRICS_PATH.exists() else {}
+    return (
+        json.loads(METRICS_PATH.read_text())
+        if METRICS_PATH.exists()
+        else {}
+    )
 
 
 @app.post("/predict")
 def predict(x: IrisInput):
-    row = [[x.sepal_length, x.sepal_width, x.petal_length, x.petal_width]]
+    row = [[
+        x.sepal_length,
+        x.sepal_width,
+        x.petal_length,
+        x.petal_width,
+    ]]
+
     idx = int(model.predict(row)[0])
     proba = model.predict_proba(row)[0]
-    return {"class_index": idx, "class_name": TARGET_NAMES[idx],
-            "probabilities": {n: round(float(p), 4) for n, p in zip(TARGET_NAMES, proba)}}
+
+    return {
+        "class_index": idx,
+        "class_name": TARGET_NAMES[idx],
+        "probabilities": {
+            name: round(float(probability), 4)
+            for name, probability in zip(TARGET_NAMES, proba)
+        },
+    }
