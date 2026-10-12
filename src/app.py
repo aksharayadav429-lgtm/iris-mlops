@@ -4,6 +4,7 @@
 import json
 import time
 from pathlib import Path
+from src.drift import get_drift_report, record_input
 
 import joblib
 from fastapi import FastAPI, Request
@@ -92,6 +93,9 @@ def metrics():
         if METRICS_PATH.exists()
         else {}
     )
+@app.get("/monitoring/drift")
+def drift():
+    return get_drift_report()
 
 
 @app.get("/monitoring/metrics")
@@ -111,6 +115,7 @@ def predict(x: IrisInput):
         x.petal_length,
         x.petal_width,
     ]]
+    record_input(row[0])
 
     idx = int(model.predict(row)[0])
     proba = model.predict_proba(row)[0]
